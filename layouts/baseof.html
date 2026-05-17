@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="{{ site.Language.Locale }}" dir="{{ or site.Language.Direction `ltr` }}">
+<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ printf "%s | %s" .Title site.Title }}{{ end }}</title>
+		{{- with resources.Get "css/main.css" }}
+			{{- $target := slice "chrome115" "edge115" "firefox116" "ios16.4" "opera101" "safari16.4" }}
+			{{- $paletteName := site.Params.style.activePalette | default "calm" }}
+			{{- $palette := index site.Params.style.palette $paletteName }}
+			{{- $opts := dict
+				"minify" (cond hugo.IsDevelopment false true)
+				"sourceMap" (cond hugo.IsDevelopment "linked" "none")
+				"target" $target
+				"vars" $palette
+			}}
+			{{- with . | css.Build $opts }}
+				{{- if hugo.IsDevelopment }}
+					<link rel="stylesheet" href="{{ .RelPermalink }}">
+				{{- else }}
+					{{- with . | fingerprint }}
+						<link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous">
+					{{- end }}
+				{{- end }}
+			{{- end }}
+		{{- end }}
+		{{- with resources.Get "js/main.js" }}
+			{{- $opts := dict
+				"minify" (cond hugo.IsDevelopment false true)
+				"sourceMap" (cond hugo.IsDevelopment "linked" "none")
+			}}
+			{{- with . | js.Build $opts }}
+				{{- if hugo.IsDevelopment }}
+					<script src="{{ .RelPermalink }}"></script>
+				{{- else }}
+					{{- with . | fingerprint }}
+						<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous"></script>
+					{{- end }}
+				{{- end }}
+			{{- end }}
+		{{- end }}
+	</head>
+	<body>
+		{{ partial "header.html" . }}
+		<main>
+			{{ block "main" . }}{{ end }}
+		</main>
+		<footer class="site-footer">
+			© {{ now.Year }} · {{ site.Title }}
+		</footer>
+	</body>
+</html>

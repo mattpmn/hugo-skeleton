@@ -1,0 +1,37 @@
+{{ define "main" }}
+<section class="intro">
+	<p class="intro__eyebrow">{{ now.Format "2006" }} · index</p>
+	<h1 class="intro__title">{{ site.Title }}</h1>
+	{{- with site.Params.description }}
+		<p class="intro__description">{{ . }}</p>
+	{{- end }}
+</section>
+
+{{- $main := index site.Home.Sections 0 }}
+{{- with $main }}
+	{{- $posts := .RegularPagesRecursive | first 30 }}
+	{{- if $posts }}
+		<ul class="posts">
+			{{- range $posts }}
+				<li class="post-row">
+					<h2 class="post-row__title">
+						<a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
+					</h2>
+					<p class="post-row__meta">
+						<time datetime="{{ .Date.Format "2006-01-02" }}">
+							{{- .Date.Format "2006-01-02" -}}
+						</time>
+						·
+						{{ .ReadingTime }} min read
+					</p>
+					{{- with .Summary }}
+						<p class="post-row__summary">{{ . | plainify | truncate 160 }}</p>
+					{{- end }}
+				</li>
+			{{- end }}
+		</ul>
+	{{- else }}
+		<p class="posts__empty">No posts yet.</p>
+	{{- end }}
+{{- end }}
+{{ end }}
